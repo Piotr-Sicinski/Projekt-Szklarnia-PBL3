@@ -1,11 +1,11 @@
-from common import *
+from sensorRead import *
 
 
 def main():
     c = BluetoothClient("DC:A6:32:F1:D8:78", None)
 
     while (True):
-        s = generateFakePayload(1)
+        s = generatePayload(1)
         string = str(s)
         print(string)
         c.send(string)
