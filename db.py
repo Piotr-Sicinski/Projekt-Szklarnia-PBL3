@@ -13,8 +13,11 @@ def findLastMeas(collection):
 def findMeasDay(collection, noDays=1):
     boundaryTime = str(datetime.now() - timedelta(days=noDays))
     query = {"timestamp": {"$gt": boundaryTime}}
-    for meas in collection.find(query).sort("timestamp", -1):
-        print(meas)
+
+    df = pd.DataFrame(list(collection.find(query).sort("timestamp", -1)))
+    print(df.to_string())
+    # for meas in collection.find(query).sort("timestamp", -1):
+    #     print(meas)
 
 
 def main():
@@ -25,8 +28,8 @@ def main():
     mydb = myclient[dbName]
     mycol = mydb[dbColection]
 
-    #findLastMeas(mycol)
-    findMeasDay(mycol)
+    findLastMeas(mycol)
+    # findMeasDay(mycol)
 
 
 if __name__ == "__main__":

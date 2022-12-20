@@ -24,8 +24,11 @@ class GatewayNode():
 
 def main():
     # init bla bla bla
-    receiver = TestReceiver()
-    writer = TerminalWriter()
+    global receivedData
+    global newDataArrived
+
+    receiver = BTReceiver()  # GenDataReceiver(datetime(2022, 9, 1))
+    writer = TerminalWriter()  # DBWriter(dbColection="dataset2")
     gateway = GatewayNode(receiver, writer)
     gateway.run()
 

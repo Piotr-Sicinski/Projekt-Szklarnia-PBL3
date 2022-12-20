@@ -4,6 +4,13 @@ from datetime import datetime, timedelta
 import random
 import pymongo
 import json
+import pandas as pd
+import numpy as np
+from bluedot.btcomm import BluetoothServer, BluetoothClient
+import ast
+
+newDataArrived = False
+receivedData = ''
 
 
 class Receiver(ABC):
@@ -28,32 +35,28 @@ class Writer(ABC):
         pass
 
 
+def data_received(data):
+    global receivedData
+    global newDataArrived
+
+    receivedData = data
+    newDataArrived = True
+
+
 class BTReceiver(Receiver):
     def __init__(self) -> None:
-        # tutaj cały init BT, adresy itp
-        pass
+        self.s = BluetoothServer(data_received)
 
-    def receive() -> dict:
-        """
-        ma zwracać jsona w postaci dicta. Oczekujemy takich dwóch typów.
-        {
-            "sensorId": 0,
-            "timestamp": "2022-12-14 23:47:40.531669",
-            "temperature": 24,
-            "humidity": 17
-        }
-        Albo
-        {
-            "sensorId": 0,
-            "timestamp": "2022-12-14 23:47:45.534343",
-            "moisture": 47
-        }
+    def receive(self) -> dict:
+        global receivedData
+        global newDataArrived
 
-        Proponuje, abyś użył funkcji generateFakePayload do testów i spróbował przepychać takie stringi bądź pliki nwm.
-        writer = TerminalWriter() tak ustawiasz do testów
-        pip install pymongo - aby Ci się nie sypał cały skrypt.
-        """
-        pass
+        while newDataArrived is False:
+            pass
+        newDataArrived = False
+        print(receivedData)
+
+        return ast.literal_eval(receivedData)
 
 
 class TestReceiver(Receiver):
@@ -63,6 +66,17 @@ class TestReceiver(Receiver):
     def receive(self) -> dict:
         sleep(5)
         payload = generateFakePayload(2)
+        return payload
+
+
+class GenDataReceiver(Receiver):
+    def __init__(self, time) -> None:
+        generateFakePayloadTime.time = time
+        pass
+
+    def receive(self) -> dict:
+        # sleep(5)
+        payload = generateFakePayloadTime(2)
         return payload
 
 
@@ -105,6 +119,32 @@ def generateFakePayload(noSensorNodes: int, measType="random") -> dict:
     payload = {
         "sensorId": random.randint(0, noSensorNodes-1),
         "timestamp": str(datetime.now())
+    }
+
+    if measType == "air":
+        payload["temperature"] = random.randint(15, 25)
+        payload["humidity"] = random.randint(0, 100)
+    else:
+        payload["moisture"] = random.randint(30, 90)
+
+    return payload
+
+
+def generateFakePayloadTime(noSensorNodes: int, measType="random") -> dict:
+
+    generateFakePayloadTime.time += timedelta(minutes=15)
+
+    if generateFakePayloadTime.time > datetime(2022, 12, 18):
+        raise Exception("Koniec generowania")
+
+    measTypeDef = ["air", "soil"]
+
+    if measType == "random":
+        measType = random.choice(measTypeDef)
+
+    payload = {
+        "sensorId": random.randint(0, noSensorNodes-1),
+        "timestamp": str(generateFakePayloadTime.time)
     }
 
     if measType == "air":
