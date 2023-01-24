@@ -17,9 +17,12 @@ class GatewayNode():
         self.writer.write(data)
 
     def run(self):
+        i = 0
         while (True):
             message = self.receive()
             self.write(message)
+            print(i)
+            i += 1
 
 
 def main():
@@ -27,8 +30,8 @@ def main():
     global receivedData
     global newDataArrived
 
-    receiver = BTReceiver()  # GenDataReceiver(datetime(2022, 9, 1))
-    writer = TerminalWriter()  # DBWriter(dbColection="dataset2")
+    receiver = TestReceiver()
+    writer = DBWriter(dbColection="dataset3")
     gateway = GatewayNode(receiver, writer)
     gateway.run()
 

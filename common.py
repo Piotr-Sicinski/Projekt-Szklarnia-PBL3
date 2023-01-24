@@ -46,6 +46,7 @@ def data_received(data):
 class BTReceiver(Receiver):
     def __init__(self) -> None:
         self.s = BluetoothServer(data_received)
+        self.s = BluetoothServer(data_received, port=2)
 
     def receive(self) -> dict:
         global receivedData
@@ -54,17 +55,19 @@ class BTReceiver(Receiver):
         while newDataArrived is False:
             pass
         newDataArrived = False
-        print(receivedData)
+        # print(receivedData)
 
-        return ast.literal_eval(receivedData)
+        # return ast.literal_eval(receivedData)
+        return str(receivedData)
 
 
 class TestReceiver(Receiver):
     def __init__(self) -> None:
+        generateFakePayload.i = 0
         pass
 
     def receive(self) -> dict:
-        sleep(5)
+        sleep(15)
         payload = generateFakePayload(2)
         return payload
 
@@ -72,6 +75,7 @@ class TestReceiver(Receiver):
 class GenDataReceiver(Receiver):
     def __init__(self, time) -> None:
         generateFakePayloadTime.time = time
+        generateFakePayloadTime.i = 0
         pass
 
     def receive(self) -> dict:
@@ -100,7 +104,7 @@ class DBWriter(Writer):
         print(x)
 
 
-def generateFakePayload(noSensorNodes: int, measType="random") -> dict:
+def generateFakePayload(noSensorNodes: int) -> dict:
     """Generates fake payload for testing purpose
 
     Args:
@@ -110,47 +114,33 @@ def generateFakePayload(noSensorNodes: int, measType="random") -> dict:
     Returns:
         dict: Generated messang
     """
-
-    measTypeDef = ["air", "soil"]
-
-    if measType == "random":
-        measType = random.choice(measTypeDef)
-
     payload = {
-        "sensorId": random.randint(0, noSensorNodes-1),
-        "timestamp": str(datetime.now())
+        "sensorId": generateFakePayload.i % noSensorNodes,
+        "timestamp": str(datetime.now()),
+        "temperature": random.randint(15, 25),
+        "humidity": random.randint(0, 100),
+        "moisture": random.randint(30, 90)
     }
-
-    if measType == "air":
-        payload["temperature"] = random.randint(15, 25)
-        payload["humidity"] = random.randint(0, 100)
-    else:
-        payload["moisture"] = random.randint(30, 90)
 
     return payload
 
 
-def generateFakePayloadTime(noSensorNodes: int, measType="random") -> dict:
+def generateFakePayloadTime(noSensorNodes: int) -> dict:
 
-    generateFakePayloadTime.time += timedelta(minutes=15)
+    raport_time = 30
+    generateFakePayloadTime.time += timedelta(minutes=raport_time/noSensorNodes)
+    generateFakePayloadTime.i += 1
 
-    if generateFakePayloadTime.time > datetime(2022, 12, 18):
+    if generateFakePayloadTime.time > datetime.now():
         raise Exception("Koniec generowania")
 
-    measTypeDef = ["air", "soil"]
-
-    if measType == "random":
-        measType = random.choice(measTypeDef)
-
     payload = {
-        "sensorId": random.randint(0, noSensorNodes-1),
-        "timestamp": str(generateFakePayloadTime.time)
-    }
+        "sensorId": generateFakePayloadTime.i % noSensorNodes,
+        "timestamp": str(generateFakePayloadTime.time),
+        "temperature": random.randint(15, 25),
+        "humidity": random.randint(0, 100),
+        "moisture": random.randint(30, 90)
 
-    if measType == "air":
-        payload["temperature"] = random.randint(15, 25)
-        payload["humidity"] = random.randint(0, 100)
-    else:
-        payload["moisture"] = random.randint(30, 90)
+    }
 
     return payload
