@@ -1,15 +1,23 @@
-from common import *
+from sensorRead import *
+
+
+def load_config():
+    f = open('config.json')
+    data = json.load(f)
+    f.close()
+    return data
 
 
 def main():
-    c = BluetoothClient("DC:A6:32:F1:D8:78", None)
+    config_data = load_config()
+    c = BluetoothClient(config_data["mac_address"], None)
 
     while (True):
-        s = generateFakePayload(1)
+        s = generatePayload(config_data["id"])
         string = str(s)
         print(string)
         c.send(string)
-        sleep(5)
+        sleep(15)
 
 
 if __name__ == "__main__":

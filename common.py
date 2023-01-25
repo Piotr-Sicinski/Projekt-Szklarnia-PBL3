@@ -109,7 +109,6 @@ def generateFakePayload(noSensorNodes: int) -> dict:
 
     Args:
         noSensorNodes (int): number of nodes to be simulated
-        measType (str, optional): type of massages that are simulated "air", "soil". Defaults to "random".
 
     Returns:
         dict: Generated messang
